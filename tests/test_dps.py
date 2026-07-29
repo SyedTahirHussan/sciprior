@@ -5,7 +5,7 @@ import math
 import pytest
 import torch
 
-from sciprior.inverse import Masking, dps_sample
+from sciprior.inverse import Masking, MeasurementOperator, dps_sample
 from sciprior.score import VPSDE
 
 
@@ -202,14 +202,58 @@ def test_dps_raises_on_residual_batch_mismatch() -> None:
     misgroup per-sample norms across `residual.reshape(batch, -1)`."""
     sde = VPSDE()
     mask = torch.ones(16)
-    y = torch.zeros(2, 1, 16)  # leading dim (2) does not match shape[0] (3)
-    with pytest.raises(ValueError, match="leading dimension"):
+    y = torch.zeros(2, 1, 16)  # broadcasts against forward output (3, 16) -> (2, 3, 16)
+    with pytest.raises(ValueError, match="broadcast against the forward output"):
         dps_sample(
             AnalyticGaussianScore(sde),
             sde,
             Masking(mask),
             y=y,
             shape=(3, 16),
+            sigma_y=0.05,
+            n_steps=5,
+            device=torch.device("cpu"),
+            generator=torch.Generator().manual_seed(0),
+        )
+
+
+class _SumOperator(MeasurementOperator):
+    """Reduces the last dimension to a single scalar per sample: `(batch, n) -> (batch, 1)`.
+
+    Used only to reproduce the broadcast blow-up in
+    `test_dps_raises_on_residual_shape_blowup`: a realistic operator whose forward
+    output has a trailing singleton dimension, the exact shape that a
+    `shape[0]`-only guard fails to catch when `y` is `(batch,)`.
+    """
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x.sum(dim=-1, keepdim=True)
+
+    def adjoint(self, y: torch.Tensor) -> torch.Tensor:
+        return y.expand(-1, 16)
+
+
+def test_dps_raises_on_residual_shape_blowup() -> None:
+    """A per-sample scalar `y` of shape `(batch,)` against a `(batch, 1)` forward
+    output must raise, not pass a `shape[0] == batch` guard and silently broadcast
+    the residual to `(batch, batch)`.
+
+    This is the exact hole a leading-dimension-only check leaves open:
+    `y - operator.forward(x0_hat)` broadcasts `(batch,)` against `(batch, 1)` into
+    `(batch, batch)`, which still has `shape[0] == batch`, so a guard that only
+    inspects the leading dimension passes while `residual.reshape(batch, -1)` mixes
+    unrelated samples into the same per-sample norm.
+    """
+    sde = VPSDE()
+    batch = 4
+    y = torch.zeros(batch)  # forward(x0_hat) is (batch, 1); this broadcasts to (batch, batch)
+    with pytest.raises(ValueError, match="broadcast against the forward output"):
+        dps_sample(
+            AnalyticGaussianScore(sde),
+            sde,
+            _SumOperator(),
+            y=y,
+            shape=(batch, 16),
             sigma_y=0.05,
             n_steps=5,
             device=torch.device("cpu"),

@@ -68,8 +68,10 @@ def figure(
     """Create a styled figure and axes.
 
     Args:
-        nrows, ncols: Subplot grid shape.
-        width, height: Figure size in inches.
+        nrows: Number of subplot rows.
+        ncols: Number of subplot columns.
+        width: Figure width, in inches.
+        height: Figure height, in inches.
 
     Returns:
         `(figure, axes)` — `axes` is a single Axes when the grid is 1x1, else an array.
@@ -106,8 +108,8 @@ def save(fig: Figure, path: Path | str, formats: tuple[str, ...] = ("png", "svg"
         ...     fig, ax = figure()
         ...     _ = ax.plot([0, 1], [0, 1])
         ...     paths = save(fig, Path(tmp) / "demo", formats=("png",))
-        ...     [p.name for p in paths]
-        ['demo.png']
+        ...     paths[0].name
+        'demo.png'
     """
     stem = Path(path)
     stem.parent.mkdir(parents=True, exist_ok=True)

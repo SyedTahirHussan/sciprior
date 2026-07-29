@@ -16,6 +16,9 @@ theme:
 nav:
   - Home: index.md
   - Calibration: calibration.md
+  - Score: score.md
+  - Inverse: inverse.md
+  - Viz: viz.md
 plugins:
   - search
   - mkdocstrings:

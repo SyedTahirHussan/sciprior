@@ -1,4 +1,4 @@
-"""Calibration diagnostics. Deliberately torch-free so it installs standalone."""
+"""Calibration diagnostics. No import-time torch dependency: importable without loading torch."""
 
 from .coverage import DEFAULT_LEVELS, CoverageResult, empirical_coverage
 from .sbc import sbc_ranks, sbc_uniformity_pvalue

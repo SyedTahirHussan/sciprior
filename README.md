@@ -27,8 +27,9 @@ uv add git+https://github.com/SyedTahirHussan/sciprior
 | `sciprior.inverse` | Measurement operators, diffusion posterior sampling | Yes |
 | `sciprior.viz` | Shared visual identity for all figures | No |
 
-`sciprior.calibration` is torch-free by design: it can be installed and used for
-meta-analysis without a deep-learning stack.
+`sciprior.calibration` has no *import-time* torch dependency: it imports only numpy and
+scipy, so it can be imported and used without loading torch, even though installing the
+`sciprior` package pulls torch in as a dependency of the other modules.
 
 ## Licence
 

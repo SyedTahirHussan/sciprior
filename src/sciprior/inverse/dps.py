@@ -73,9 +73,11 @@ def dps_sample(
         Posterior samples of shape `shape`.
 
     Raises:
-        ValueError: If `sigma_y` is not positive, if `n_steps < 2`, or if the
-            measurement residual's leading dimension does not match `shape[0]`
-            (a broadcasting mismatch between `y` and `operator.forward(x0_hat)`).
+        ValueError: If `sigma_y` is not positive, if `n_steps < 2`, or if `y` does
+            not have exactly the same shape as `operator.forward(x0_hat)` (a
+            broadcasting mismatch that would otherwise silently reshape into
+            `(batch, -1)` and group unrelated values into the same per-sample
+            norm).
 
     Example:
         >>> import torch
@@ -117,12 +119,14 @@ def dps_sample(
             mean_coeff, std = sde.marginal_prob(torch.ones_like(x), t)
             x0_hat = (x + (std**2) * score) / mean_coeff
 
-            residual = y - operator.forward(x0_hat)
-            if residual.shape[0] != batch:
+            forward_out = operator.forward(x0_hat)
+            residual = y - forward_out
+            if residual.shape != forward_out.shape:
                 raise ValueError(
-                    f"measurement residual has leading dimension {residual.shape[0]}, "
-                    f"expected {batch} (shape[0] of `shape`); check that `y` broadcasts "
-                    "against `operator.forward(x0_hat)` along the batch dimension"
+                    f"measurement residual has shape {tuple(residual.shape)}, but "
+                    f"operator.forward(x0_hat) has shape {tuple(forward_out.shape)}; "
+                    "`y` broadcast against the forward output instead of matching it "
+                    "exactly, which would silently corrupt residual.reshape(batch, -1)"
                 )
             norm = torch.linalg.vector_norm(residual.reshape(batch, -1), dim=-1).sum()
             (likelihood_grad,) = torch.autograd.grad(norm, x)
