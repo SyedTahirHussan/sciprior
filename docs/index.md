@@ -27,8 +27,9 @@ uv add git+https://github.com/SyedTahirHussan/sciprior
 
 ## Design notes
 
-`sciprior.calibration` has no torch dependency. It can be installed standalone for
-meta-analysis of results produced elsewhere.
+`sciprior.calibration` has no *import-time* torch dependency — it imports only numpy and
+scipy, so it can be imported and used without loading torch, even though installing the
+`sciprior` package pulls torch in as a dependency of the other modules.
 
 Every `MeasurementOperator` must pass `dot_product_test`, which verifies the adjoint
 identity `<Ax, y> == <x, A*y>`. A wrong adjoint is the most common bug in
