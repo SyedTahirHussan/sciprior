@@ -1,0 +1,28 @@
+site_name: sciprior
+site_description: Generative priors, calibration diagnostics, and inverse-problem tools for scientific ML
+repo_url: https://github.com/SyedTahirHussan/sciprior
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle: { icon: material/weather-night, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle: { icon: material/weather-sunny, name: Light mode }
+  features: [navigation.sections, content.code.copy]
+nav:
+  - Home: index.md
+  - Calibration: calibration.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.highlight

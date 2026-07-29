@@ -1,0 +1,16 @@
+# Environments and caches — never committed, always regenerable.
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+.DS_Store
+
+# mkdocs build output (`mkdocs build`), not source.
+site/
+
+# Build artifacts.
+dist/
+*.egg-info/

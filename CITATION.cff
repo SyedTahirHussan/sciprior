@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: "sciprior: generative priors and calibration diagnostics for scientific ML"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Hussan
+    given-names: Syed Tahir
+    email: tahirsherazi786@gmail.com
+repository-code: "https://github.com/SyedTahirHussan/sciprior"
+license: MIT
+version: 0.1.0
+date-released: "2026-07-28"
